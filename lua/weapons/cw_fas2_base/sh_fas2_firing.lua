@@ -26,7 +26,7 @@ function SWEP:MakeRecoil(mod)
         viewPunchAngle.y = yawRecoil * self.RecoilSide * finalMod
         -- viewPunchAngle.r = yawRecoil * self.Recoil * 0.125 * finalMod
         self:GetOwner():ViewPunch(viewPunchAngle)
-        self.CameraShakeFactor = GetConVar("cw_fas2_recoil_shake"):GetBool() and (self.Recoil / 2 + self.RecoilSide / 2) * 0.011 * finalMod or 0
+        self.CameraShakeFactor = GetConVar("cw_fas2_recoil_shake"):GetBool() and (self.Recoil / 2 + self.RecoilSide / 2) * 0.012 * finalMod or 0
     end
 
     if CLIENT and IFTP and self.AimBreathingEnabled then

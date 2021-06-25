@@ -51,7 +51,15 @@ function SWEP:beginReload()
                 animString = animString .. "_empty"
             end
             if self.ShotgunReloadEmptyInsert then
-                self:SetClip1(self.ShotgunReloadEmptyInsertCount)
+                if self:Ammo1() <= 0 and self.AmmoStash and self.AmmoStash > 0 then
+                    self.AmmoStash = math.Clamp(self.AmmoStash - self.ShotgunReloadEmptyInsertCount, 0, self.AmmoStash)
+                else
+                    self:GetOwner():SetAmmo(math.max(self:Ammo1() - self.ShotgunReloadEmptyInsertCount, 0), self.Primary.Ammo)
+                end
+                -- there's a gap in the logic here but right now... im so lazy
+                if SERVER then
+                    self:SetClip1(mag + self.ShotgunReloadEmptyInsertCount)
+                end
                 self.WasEmpty = false
                 if self.ManualCycling then self.Cocked = true end
             end

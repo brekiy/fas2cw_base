@@ -15,9 +15,11 @@ local function CW2_FAS2_AdminPanel(panel)
     end
 
     -- panel:AddControl("Button", {Label = "Apply Changes", Command = "cw_applychanges"})
+    panel:AddControl("Label", {Text = "Booleans"})
 
     panel:AddControl("CheckBox", {Label = "Enable physical bullets?", Command = "cw_fas2_physical_bullets"})
 
+    panel:AddControl("Label", {Text = "Multipliers"})
     -- autocenter time slider
     local slider = vgui.Create("DNumSlider", panel)
     slider:SetDecimals(2)
@@ -25,7 +27,7 @@ local function CW2_FAS2_AdminPanel(panel)
     slider:SetMax(2)
     slider:SetConVar("cw_fas2_effrange_mult")
     slider:SetValue(GetConVar("cw_fas2_effrange_mult"):GetFloat())
-    slider:SetText("Multiplier: Effective Range")
+    slider:SetText("Effective Range")
     slider:SetDark(true)
     panel:AddItem(slider)
 
@@ -36,7 +38,7 @@ local function CW2_FAS2_AdminPanel(panel)
     slider:SetMax(2)
     slider:SetConVar("cw_fas2_physical_bullet_muzzle_velocity_mult")
     slider:SetValue(GetConVar("cw_fas2_physical_bullet_muzzle_velocity_mult"):GetFloat())
-    slider:SetText("Multiplier: Phys. Bullet Muzzle Velocity")
+    slider:SetText("Phys. Bullet Speed")
     slider:SetDark(true)
     panel:AddItem(slider)
 
