@@ -1,3 +1,7 @@
+local reg = debug.getregistry()
+-- since these are often-called functions (and somewhat expensive), we make local references to them to reduce the overhead as much as possible
+local ManipulateBonePosition, ManipulateBoneAngles = reg.Entity.ManipulateBonePosition, reg.Entity.ManipulateBoneAngles
+
 function SWEP:getBaseViewModelPos()
     if GetConVar("cw_alternative_vm_pos"):GetBool() and !self:GetOwner():IsSprinting() and self.AlternativePos then
         if self:GetOwner():Crouching() and self.AlternativeCrouchPos then
@@ -58,45 +62,214 @@ function SWEP:CreateShell(sh)
     end
 end
 
---[[
-    Spawns a number of shells
-    shell: shell name in cw shells arr e.g. 9x19, 10x25
-    everything else is self-explanatory
-]]--
--- function SWEP:FAS2_MakeFakeShell(shell, num, pos, ang, vel, removetime, shellscale)
---     if !shell or !pos then
---         return
---     end
+-- offsetBones helper because wow there are a ton of scopes
+-- ugly af lol
+function SWEP:canOffsetForegrip()
+    local offsetName = "ForeGripOffsetCycle_Reload"
+    if self.Sequence == self.Animations.reload or self.Sequence == self.Animations.reload_empty
+        or self.Sequence == self.Animations.reload_fast or self.Sequence == self.Animations.reload_fast_empty then
+            if self:IsNonVanillaFastReload() then
+                offsetName = offsetName .. "_Fast"
+            end
+            if self.wasEmpty then
+                offsetName = offsetName .. "_Empty"
+            end
+    elseif self.Sequence == self.Animations.reload_start then
+        offsetName = offsetName .. "Start"
+        if self:IsNonVanillaFastReload() then
+            offsetName = offsetName .. "_Fast"
+        end
+        if self.wasEmpty then
+            offsetName = offsetName .. "_Empty"
+        end
+    elseif self.Sequence == self.Animations.insert then
+        offsetName = offsetName .. "Insert"
+        if self:IsNonVanillaFastReload() then
+            offsetName = offsetName .. "_Fast"
+        end
+    elseif self.Sequence == self.Animations.reload_end then
+        offsetName = offsetName .. "End"
+        if self:IsNonVanillaFastReload() then
+            offsetName = offsetName .. "_Fast"
+        end
+    elseif self.Sequence == self.Animations.draw then
+        offsetName = "ForeGripOffsetCycle_Draw"
+    else
+        return true
+    end
+    if !self[offsetName] then
+        print("tried to use invalid offsetName", offsetName)
+        return false
+    else
+        return self.Cycle >= self[offsetName]
+    end
+end
 
---     ang = ang or AngleRand()
---     vel = vel or Vector(0, 0, -100)
---     vel = vel + VectorRand() * 5
---     num = num or 1
---     removetime = removetime or 5
---     shellscale = shellscale or 1
---     local shellTable = CustomizableWeaponry.shells:getShell(shell)
+function SWEP:canOffsetM203()
+    local offsetName = "M203OffsetCycle_Reload"
+    if self.Sequence == self.Animations.reload or self.Sequence == self.Animations.reload_empty
+        or self.Sequence == self.Animations.reload_fast or self.Sequence == self.Animations.reload_fast_empty then
+            if self:IsNonVanillaFastReload() then
+                offsetName = offsetName .. "_Fast"
+            end
+            if self.wasEmpty then
+                offsetName = offsetName .. "_Empty"
+            end
+    elseif self.Sequence == self.Animations.reload_start then
+        offsetName = offsetName .. "Start"
+        if self:IsNonVanillaFastReload() then
+            offsetName = offsetName .. "_Fast"
+        end
+        if self.wasEmpty then
+            offsetName = offsetName .. "_Empty"
+        end
+    elseif self.Sequence == self.Animations.insert then
+        offsetName = offsetName .. "Insert"
+        if self:IsNonVanillaFastReload() then
+            offsetName = offsetName .. "_Fast"
+        end
+    elseif self.Sequence == self.Animations.reload_end then
+        offsetName = offsetName .. "End"
+        if self:IsNonVanillaFastReload() then
+            offsetName = offsetName .. "_Fast"
+        end
+    elseif self.Sequence == self.Animations.draw then
+        offsetName = "M203OffsetCycle_Draw"
+    else
+        return true
+    end
 
---     for i = 1, num do
---         local shellEnt = ClientsideModel(shellTable.m, RENDERGROUP_BOTH)
---         shellEnt:SetPos(pos)
---         shellEnt:PhysicsInitBox(self.shellBoundBox[1], self.shellBoundBox[2])
---         shellEnt:SetAngles(ang)
---         shellEnt:SetModelScale(shellscale, 0)
---         shellEnt:SetMoveType(MOVETYPE_VPHYSICS)
---         shellEnt:SetSolid(SOLID_VPHYSICS)
---         shellEnt:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+    return self.Cycle >= self[offsetName]
+end
+local Vec0, Ang0 = Vector(), Angle()
+-- Overriden to allow fast reload bone offsetting
+function SWEP:offsetBones()
+    local vm = self.CW_VM
 
---         local phys = shellEnt:GetPhysicsObject()
---         phys:SetMaterial("gmod_silent")
---         phys:SetMass(10)
---         phys:SetVelocity(vel)
---         if shellTable.s then
---             shellEnt:EmitSound(shellTable.s, 35, 100)
---         end
+    -- if the animation cycle is past reload/draw no offset time of bones, then it falls within the bone offset timeline
+    local FT = FrameTime()
 
---         SafeRemoveEntityDelayed(shellEnt, removetime)
---     end
--- end
+    if self.AttachmentModelsVM then
+        local can = false
+        local canModifyBones = self.AttachmentModelsVM.md_foregrip or self.AttachmentModelsVM.md_m203 or self.ForegripOverride
+
+        local foregrip = (self.AttachmentModelsVM.md_foregrip and self.AttachmentModelsVM.md_foregrip.active)
+        local m203 = (self.AttachmentModelsVM.md_m203 and self.AttachmentModelsVM.md_m203.active)
+        local otherOffsets = foregrip or m203
+
+        if foregrip or self.ForegripOverride then
+            can = self:canOffsetForegrip()
+        end
+
+        if m203 and !self.dt.M203Active then
+            can = self:canOffsetM203()
+        end
+
+        local targetTbl = false
+
+        -- select the desired offset table
+        if can then
+            local fallback = true
+
+            if self.ForegripOverride and self.ForegripOverridePos then
+                local desiredTarget = self.ForegripOverridePos[self.ForegripParent]
+
+                if desiredTarget then
+                    if !desiredTarget.weakOverride or (desiredTarget.weakOverride and !otherOffsets) then
+
+                        targetTbl = desiredTarget
+                        canModifyBones = true
+                    else
+                        fallback = true
+                    end
+                else
+                    canModifyBones = false
+                end
+            end
+
+            if fallback then
+                if foregrip then
+                    targetTbl = self.ForeGripHoldPos
+                elseif m203 then
+                    targetTbl = self.M203HoldPos
+                end
+            end
+        end
+
+        if !targetTbl then
+            can = false
+        end
+
+        if m203 then
+            if self.dt.M203Active or UnPredictedCurTime() < self.M203Time then
+                self:offsetM203ArmBone(true)
+                ManipulateBonePosition(vm, self.BaseArmBone, self.BaseArmBoneOffset)
+
+                return
+            else
+                if self.curM203Anim ~= self.M203Anims.ready_to_idle then
+                    self:resetM203Anim()
+                end
+
+                self:offsetM203ArmBone(false)
+            end
+        end
+
+        if self.canOffsetMagBone then
+            self:offsetMagBone(false)
+        end
+
+        if canModifyBones then
+            for k, v in pairs(self.vmBones) do
+                if can then
+                    local index = targetTbl[v.boneName]
+
+                    v.curPos = LerpVectorCW20(FT * 15, v.curPos, index and index.pos or Vec0)
+                    v.curAng = LerpAngleCW20(FT * 15, v.curAng, index and index.angle or Ang0)
+                else
+                    v.curPos = LerpVectorCW20(FT * 15, v.curPos, Vec0)
+                    v.curAng = LerpAngleCW20(FT * 15, v.curAng, Ang0)
+                end
+
+                ManipulateBonePosition(vm, v.bone, v.curPos)
+                ManipulateBoneAngles(vm, v.bone, v.curAng)
+            end
+        end
+    end
+
+    if self.BoltBoneID then
+        local can = true
+        local recoverySpeed = self.BoltBonePositionRecoverySpeed
+
+        if self.BoltShootOffset then
+            if self.HoldBoltWhileEmpty and self:Clip1() == 0 and self.Sequence ~= self.EmptyBoltHoldAnimExclusion then
+                if (self.IsReloading and self.Cycle > 0.98) or !self.IsReloading then
+                    can = false
+                    self.CurBoltBonePos = self.BoltShootOffset * 1
+                end
+            end
+
+            ManipulateBonePosition(vm, self.BoltBoneID, self.CurBoltBonePos)
+        end
+
+        if self.OffsetBoltDuringNonEmptyReload then
+            if self.IsReloading and self.Cycle <= self.StopReloadBoneOffset and self:Clip1() > 0 then
+                self.CurBoltBonePos = math.ApproachVector(self.CurBoltBonePos, self.BoltReloadOffset, FT * self.ReloadBoltBonePositionMoveSpeed)
+                can = false
+            else
+                if can then
+                    recoverySpeed = self.ReloadBoltBonePositionRecoverySpeed
+                end
+            end
+
+            ManipulateBonePosition(vm, self.BoltBoneID, self.CurBoltBonePos)
+        end
+
+        if can then
+            self.CurBoltBonePos = math.ApproachVector(self.CurBoltBonePos, Vec0, FT * recoverySpeed)
+        end
+    end
+end
 
 --[[
     Spawns a number of shells at an attachment

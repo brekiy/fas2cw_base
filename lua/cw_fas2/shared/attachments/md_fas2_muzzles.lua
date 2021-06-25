@@ -1,12 +1,12 @@
 local att = {}
 att.name = "md_fas2_compensator"
 att.displayName = "Compensator"
-att.displayNameShort = "Compensator"
+att.displayNameShort = "Comp."
 
 att.statModifiers = {
-    RecoilMult = -0.35,
+    RecoilMult = -0.45,
     RecoilSideMult = -0.1,
-    SpreadPerShotMult = -0.15
+    -- SpreadPerShotMult = -0.2,
 }
 
 if CLIENT then
@@ -21,12 +21,11 @@ CustomizableWeaponry:registerAttachment(att)
 att = {}
 att.name = "md_fas2_muzzlebrake"
 att.displayName = "Muzzle Brake"
-att.displayNameShort = "Muzzle Brake"
+att.displayNameShort = "Muz. Brake"
 
 att.statModifiers = {
     RecoilMult = -0.2,
-    RecoilSideMult = -0.25,
-    SpreadPerShotMult = -0.05
+    RecoilSideMult = -0.45,
 }
 
 if CLIENT then
@@ -40,14 +39,14 @@ CustomizableWeaponry:registerAttachment(att)
 att = {}
 att.name = "md_fas2_suppressor"
 att.displayName = "Suppressor"
-att.displayNameShort = "Suppressor"
+att.displayNameShort = "Supp."
 att.isSuppressor = true
 att.NearWallDistance = 3
 
 att.statModifiers = {
     RecoilMult = -0.1,
     RecoilSideMult = -0.05,
-    SpreadPerShotMult = -0.1,
+    SpreadPerShotMult = -0.15,
 }
 
 if CLIENT then

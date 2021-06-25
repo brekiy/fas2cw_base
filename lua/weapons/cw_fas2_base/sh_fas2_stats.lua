@@ -8,6 +8,11 @@ function SWEP:recalculateRecoilSide()
     self.RecoilSide = self.RecoilSide_Orig * self.RecoilSideMult
 end
 
+-- was missing from vanilla base
+function SWEP:recalculateSpreadPerShot()
+    self.SpreadPerShot = self.SpreadPerShot_Orig * self.SpreadPerShotMult
+end
+
 -- fix bug where this was based off of damagemult lmao
 function SWEP:recalculateClumpSpread()
     if !self.ClumpSpread then
@@ -70,6 +75,7 @@ function SWEP:recalculateStats()
     self:recalculateDeployTime()
     self:recalculateReloadSpeed()
     self:recalculateClumpSpread()
+    self:recalculateSpreadPerShot()
 
     if CLIENT then
         self:recalculateMouseSens()
