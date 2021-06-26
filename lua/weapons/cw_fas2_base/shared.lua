@@ -78,7 +78,9 @@ if CLIENT then
     SWEP.FakeShellOffsetCalcs = {
         -- ejector3 = SKS_Ejector3Offsetter,
     }
-    -- Dunno why, but we can't have an empty table in here. Must be set in each weapon that you want to have c-hands
+    -- Dunno why, but we can't have an empty table in here. Must be set to an empty table at least in each weapon that uses a bodygroup optic.
+    -- Otherwise the code will just skip over setting aim positions for bodygroup optics. :)
+    -- What a nice gap in logic that i cant be assed to override right now
     -- SWEP.AttachmentModelsVM = {}
     SWEP.CArmsVM = true
     SWEP.CArmsModel = "models/weapons/c_arms.mdl"
@@ -193,6 +195,6 @@ SWEP.InsertShellFastTime = 0.75
 SWEP.ReloadFinishWait = 1.5
 SWEP.ReloadFinishFastWait = 1
 SWEP.PumpMidReloadWait = 0.7
-]]-- 
+]]--
 
 SWEP.Chamberable = true

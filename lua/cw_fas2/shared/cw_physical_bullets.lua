@@ -278,7 +278,6 @@ end
 function CustomizableWeaponry:processBullets(ply, ucmd)
     local curIndex = 1
     local bullets = self.physicalBulletBuffer[ply]
-    local frameTime = FrameTime()
 
     if bullets then
         local ft = FrameTime()
@@ -341,11 +340,10 @@ if CLIENT then
         ["$additive"] = "1",
         ["$vertexcolor"] = "1",
         ["$vertexalpha"] = "1"}
-
     local bulletTracer = CreateMaterial("cw20_bullet_tracer", "UnlitGeneric", t)
     local trail = Material("effects/smoke_trail")
-    local clr = Color(255, 167, 112, 255)
-    local clrReg = Color(158, 150, 145, 51)
+    local clr = Color(252, 249, 80)
+    local clrReg = Color(122, 122, 122, 103)
 
     local bulletWhizTime = 0
 
@@ -358,25 +356,25 @@ if CLIENT then
             if not IsValid(ply) then -- player does not exist, don't draw his bullets
                 self.physicalBulletBuffer[ply] = nil
             else
-                for key, bulletData in ipairs(data) do
-                    local pos = bulletData.position
-                    local norm = bulletData.direction:GetNormal()
+                for key, bData in ipairs(data) do
+                    local pos = bData.position
+                    local norm = bData.direction:GetNormal()
 
-                    if bulletData.player ~= localPlayer and norm:Dot(eyeAngles:GetNormalized()) < 0 and CT > bulletWhizTime and bulletData.position:Distance(playerPos) <= self.WHIZ_DISTANCE then -- emit a whiz sound
+                    if bData.player ~= localPlayer and norm:Dot(eyeAngles:GetNormalized()) < 0 and CT > bulletWhizTime and bData.position:Distance(playerPos) <= self.WHIZ_DISTANCE then -- emit a whiz sound
                         EmitSound("weapons/fx/nearmiss/bulletLtoR0" .. math.random(3, 9) .. ".wav", pos, ply:EntIndex(), CHAN_AUTO, 1, 70, 0, 100)
                         bulletWhizTime = CT + self.WHIZ_EVERY
                     end
 
-                    if bulletData.isTracer then
+                    if bData.isTracer then
                         render.SetMaterial(bulletTracer)
                         render.DrawSprite(pos + norm * 64, 6, 6, clr)
                         render.SetMaterial(trail)
-                        render.DrawBeam(pos + norm * 64, pos, 3, 0, 1, clr)
+                        render.DrawBeam(pos + norm * 64, pos, 6, 0, 1, clr)
                     elseif GetConVar("cw_fas2_physical_bullet_nontracer_trails"):GetBool() then
                         render.SetMaterial(bulletTracer)
-                        render.DrawSprite(pos + norm * 32, 2, 2, clrReg)
+                        render.DrawSprite(pos + norm * 16, 3, 3, clrReg)
                         render.SetMaterial(trail)
-                        render.DrawBeam(pos + norm * 32, pos, 1, 0, 1, clrReg)
+                        render.DrawBeam(pos + norm * 32, pos, 2, 0, 1, clrReg)
                     end
                 end
             end

@@ -280,14 +280,28 @@ function SWEP:CalcView(ply, pos, ang, fov)
     self.curFOV = fov
     self.curViewBob = curviewbob * self.ViewbobIntensity
     ang = ang + curviewbob * self.ViewbobIntensity
-    -- local shakeFactor = GetConVar("cw_fas2_recoil_shake"):GetBool() and math.Clamp(self.AddSpread * self:GetRecoilModifier() * 0.2, 0, 0.0025) or 0
-    local shakeAngle = AngleRand()
-    shakeAngle.p = shakeAngle.p * 0.4
-    shakeAngle.y = shakeAngle.y * 0.5
-    shakeAngle.r = shakeAngle.y * -0.25
-    ang = ang + shakeAngle * self.CameraShakeFactor
+    if GetConVar("cw_fas2_recoil_shake"):GetBool() then
+        local shakeAngle = AngleRand()
+        shakeAngle.p = shakeAngle.p * 0.2
+        shakeAngle.y = shakeAngle.y * 0.2
+        shakeAngle.r = shakeAngle.y * -2
+        -- self.LastShakeAngle = shakeAngle * self.CameraShakeFactor
+        ang = ang + shakeAngle * self.CameraShakeFactor
+    end
     local cooldownRate = 20 - math.Clamp(self.FireDelay, 0.05, 0.1) * (1 / self.SpreadCooldown)
     self.CameraShakeFactor = Lerp(cooldownRate * FrameTime(), self.CameraShakeFactor, 0)
     return pos, ang, fov
 end
 
+-- Override to provide more natural looking reticle movement
+function SWEP:getReticleAngles()
+    if self.freeAimOn then
+        local ang = self.CW_VM:GetAngles()
+        ang.p = ang.p + self.AimAng.x
+        ang.y = ang.y - self.AimAng.y
+        ang.r = ang.r - self.AimAng.z
+
+        return ang
+    end
+    return self:GetOwner():EyeAngles() + self:GetOwner():GetViewPunchAngles() * 1.075
+end
