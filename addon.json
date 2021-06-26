@@ -1,0 +1,13 @@
+{
+    "title": "[CW2] FA:S 2 Base",
+    "description": "",
+    "type": "weapon",
+    "tags": [
+        "realism",
+        "fun"
+    ],
+    "ignore": [
+        ".git/*",
+        "README.md"
+    ]
+}
