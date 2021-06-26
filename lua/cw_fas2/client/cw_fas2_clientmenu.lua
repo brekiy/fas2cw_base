@@ -18,6 +18,7 @@ local function CW2_FAS2_AdminPanel(panel)
     panel:AddControl("Label", {Text = "Booleans"})
 
     panel:AddControl("CheckBox", {Label = "Enable physical bullets?", Command = "cw_fas2_physical_bullets"})
+    panel:AddControl("CheckBox", {Label = "Draw non-tracer physical bullets?", Command = "cw_fas2_physical_bullet_nontracer_trails"})
 
     panel:AddControl("Label", {Text = "Multipliers"})
     -- autocenter time slider
