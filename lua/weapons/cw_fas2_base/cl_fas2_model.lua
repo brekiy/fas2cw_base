@@ -207,7 +207,7 @@ function SWEP:offsetBones()
 
                 return
             else
-                if self.curM203Anim ~= self.M203Anims.ready_to_idle then
+                if self.curM203Anim != self.M203Anims.ready_to_idle then
                     self:resetM203Anim()
                 end
 
@@ -242,7 +242,7 @@ function SWEP:offsetBones()
         local recoverySpeed = self.BoltBonePositionRecoverySpeed
 
         if self.BoltShootOffset then
-            if self.HoldBoltWhileEmpty and self:Clip1() == 0 and self.Sequence ~= self.EmptyBoltHoldAnimExclusion then
+            if self.HoldBoltWhileEmpty and self:Clip1() == 0 and self.Sequence != self.EmptyBoltHoldAnimExclusion then
                 if (self.IsReloading and self.Cycle > 0.98) or !self.IsReloading then
                     can = false
                     self.CurBoltBonePos = self.BoltShootOffset * 1
@@ -439,3 +439,17 @@ function SWEP:_drawViewModel()
         self:draw3D2DHUD()
     end
 end
+
+CustomizableWeaponry.callbacks:addNew("initialize", "FAS2_autoIcon", function(self)
+    -- will look for a select icon texture under /materials/vgui/inventory/<weapon classname>
+    local weaponClass = self:GetClass()
+    local defaultPath = "vgui/inventory/" .. weaponClass
+    local iconMaterial = Material(defaultPath)
+
+    if iconMaterial:IsError() then return end
+    local iconTexture = mat:GetTexture("$basetexture")
+    if iconTexture:IsError() then return end
+    local iconTextureName = iconTexture:GetName()
+    killicon.Add(weaponClass, iconTextureName)
+    self.WepSelectIcon = surface.GetTextureID(iconTextureName)
+end)
