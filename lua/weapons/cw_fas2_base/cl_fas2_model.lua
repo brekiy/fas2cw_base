@@ -447,9 +447,9 @@ CustomizableWeaponry.callbacks:addNew("initialize", "FAS2_autoIcon", function(se
     local iconMaterial = Material(defaultPath)
 
     if iconMaterial:IsError() then return end
-    local iconTexture = mat:GetTexture("$basetexture")
+    local iconTexture = iconMaterial:GetTexture("$basetexture")
     if iconTexture:IsError() then return end
     local iconTextureName = iconTexture:GetName()
-    killicon.Add(weaponClass, iconTextureName)
-    self.WepSelectIcon = surface.GetTextureID(iconTextureName)
+    killicon.Add(weaponClass, iconTextureName, Color(255, 255, 255))
+    self.SelectIcon = surface.GetTextureID(iconTextureName)
 end)

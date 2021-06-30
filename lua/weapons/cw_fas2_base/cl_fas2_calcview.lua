@@ -1,10 +1,3 @@
-
---[[
-    Override this to:
-    1. Clean it up a little bit, seriously
-    2. Tweak the recoil viewpunch/camerashake
-]]--
-
 -- Bunch of global locals, presumably to cache references
 local FT, CT, cos1, cos2, ws, vel, att
 local Ang0, curang, curviewbob = Angle(0, 0, 0), Angle(0, 0, 0), Angle(0, 0, 0)
@@ -16,6 +9,37 @@ local Up = reg.Angle.Up
 local Forward = reg.Angle.Forward
 local RotateAroundAxis = reg.Angle.RotateAroundAxis
 
+-- Split reload viewbob into another function, do the mod and return the angle
+function SWEP:DoReloadViewbob(ang)
+    if self.IsReloading and self.Cycle <= 0.9 then
+        att = self:GetOwner():GetAttachment(1)
+
+        if att then
+            ang = ang * 1
+
+            self.LerpBackSpeed = 1
+            curang = LerpAngle(FT * 5, curang, (ang - att.Ang) * 0.1)
+        else
+            self.LerpBackSpeed = math.Approach(self.LerpBackSpeed, 5, FT * 50)
+            curang = LerpAngle(FT * self.LerpBackSpeed, curang, Ang0)
+        end
+    else
+        self.LerpBackSpeed = math.Approach(self.LerpBackSpeed, 10, FT * 50)
+        curang = LerpAngle(FT * self.LerpBackSpeed, curang, Ang0)
+    end
+
+    RotateAroundAxis(ang, Right(ang), math.Clamp(curang.p * self.RVBPitchMod, -90, 90))
+    RotateAroundAxis(ang, Up(ang), math.Clamp(curang.r * 0.5 * self.RVBYawMod, -90, 90))
+    RotateAroundAxis(ang, Forward(ang), math.Clamp((curang.p + curang.r) * 0.15 * self.RVBRollMod, -90, 90))
+    return ang
+end
+
+--[[
+    Override this to:
+    1. Clean it up a little bit, seriously
+    2. Split the original CalcView into helper fxns for readability
+    3. Tweak the recoil viewpunch/camerashake
+]]--
 function SWEP:CalcView(ply, pos, ang, fov)
     self.freeAimOn = self:isFreeAimOn()
     self.autoCenterFreeAim = GetConVar("cw_freeaim_autocenter"):GetBool()
@@ -170,26 +194,7 @@ function SWEP:CalcView(ply, pos, ang, fov)
     end
 
     if self.ReloadViewBobEnabled then
-        if self.IsReloading and self.Cycle <= 0.9 then
-            att = self:GetOwner():GetAttachment(1)
-
-            if att then
-                ang = ang * 1
-
-                self.LerpBackSpeed = 1
-                curang = LerpAngle(FT * 10, curang, (ang - att.Ang) * 0.1)
-            else
-                self.LerpBackSpeed = math.Approach(self.LerpBackSpeed, 10, FT * 50)
-                curang = LerpAngle(FT * self.LerpBackSpeed, curang, Ang0)
-            end
-        else
-            self.LerpBackSpeed = math.Approach(self.LerpBackSpeed, 10, FT * 50)
-            curang = LerpAngle(FT * self.LerpBackSpeed, curang, Ang0)
-        end
-
-        RotateAroundAxis(ang, Right(ang), curang.p * self.RVBPitchMod)
-        RotateAroundAxis(ang, Up(ang), curang.r * self.RVBYawMod)
-        RotateAroundAxis(ang, Forward(ang), (curang.p + curang.r) * 0.15 * self.RVBRollMod)
+        ang = self:DoReloadViewbob(ang)
     end
 
     local fovOverride = false
