@@ -1,6 +1,7 @@
 SWEP.Base = "cw_base"
 
 AddCSLuaFile()
+AddCSLuaFile("cl_fas2_hud.lua")
 AddCSLuaFile("cl_fas2_model.lua")
 AddCSLuaFile("cl_fas2_calcview.lua")
 AddCSLuaFile("cl_fas2_cvars.lua")
@@ -40,6 +41,7 @@ CustomizableWeaponry:registerAmmo(".50 GI", ".50 GI Rounds", 12.7, 22.8)
 
 if CLIENT then
     include("cl_fas2_cvars.lua")
+    include("cl_fas2_hud.lua")
     include("cl_fas2_model.lua")
     include("cl_fas2_calcview.lua")
 
@@ -91,6 +93,9 @@ SWEP.UseHands = true
 -- render target shit on the base FAS2 weapons
 SWEP.PSO1Glass = Material("models/weapons/view/accessories/Lens_EnvSolid")
 
+-- these suck
+SWEP.BounceWeaponIcon = false
+SWEP.DrawWeaponInfoBox = false
 
 SWEP.MuzzleVelocity = 300 -- m/s, required value
 SWEP.ManualCycling = false -- bolt/pump, if true then uncocks the gun every shot
