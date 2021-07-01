@@ -439,17 +439,3 @@ function SWEP:_drawViewModel()
         self:draw3D2DHUD()
     end
 end
-
-CustomizableWeaponry.callbacks:addNew("initialize", "FAS2_autoIcon", function(self)
-    -- will look for a select icon texture under /materials/vgui/inventory/<weapon classname>
-    local weaponClass = self:GetClass()
-    local defaultPath = "vgui/inventory/" .. weaponClass
-    local iconMaterial = Material(defaultPath)
-
-    if iconMaterial:IsError() then return end
-    local iconTexture = mat:GetTexture("$basetexture")
-    if iconTexture:IsError() then return end
-    local iconTextureName = iconTexture:GetName()
-    killicon.Add(weaponClass, iconTextureName)
-    self.WepSelectIcon = surface.GetTextureID(iconTextureName)
-end)
