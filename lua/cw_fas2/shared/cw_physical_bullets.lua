@@ -341,9 +341,9 @@ if CLIENT then
         ["$vertexcolor"] = "1",
         ["$vertexalpha"] = "1"}
     local bulletTracer = CreateMaterial("cw20_bullet_tracer", "UnlitGeneric", t)
-    local trail = Material("effects/fas_smoke_beam")
-    local clr = Color(252, 249, 80)
-    local clrReg = Color(122, 122, 122, 103)
+    local trail = Material("trails/smoke")
+    local clr = Color(252, 249, 80, 200)
+    local clrReg = Color(122, 122, 122, 200)
 
     local bulletWhizTime = 0
 
@@ -369,10 +369,10 @@ if CLIENT then
                         render.SetMaterial(bulletTracer)
                         render.DrawSprite(pos + norm * 64, 6, 6, clr)
                         render.SetMaterial(trail)
-                        render.DrawBeam(pos + norm * 64, pos, 6, 0, 1, clr)
+                        render.DrawBeam(pos + norm * 64, pos, 4, 0, 1, clr)
                     elseif GetConVar("cw_fas2_physical_bullet_nontracer_trails"):GetBool() then
                         render.SetMaterial(bulletTracer)
-                        render.DrawSprite(pos + norm * 16, 3, 3, clrReg)
+                        render.DrawSprite(pos + norm * 32, 3, 3, clrReg)
                         render.SetMaterial(trail)
                         render.DrawBeam(pos + norm * 32, pos, 2, 0, 1, clrReg)
                     end
