@@ -341,7 +341,7 @@ if CLIENT then
         ["$vertexcolor"] = "1",
         ["$vertexalpha"] = "1"}
     local bulletTracer = CreateMaterial("cw20_bullet_tracer", "UnlitGeneric", t)
-    local trail = Material("effects/smoke_trail")
+    local trail = Material("effects/fas_smoke_beam")
     local clr = Color(252, 249, 80)
     local clrReg = Color(122, 122, 122, 103)
 
