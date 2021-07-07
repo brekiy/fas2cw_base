@@ -1,5 +1,6 @@
 # CW2 - Firearms: Source 2 Base Expansion
 [Steam Workshop addon](https://steamcommunity.com/sharedfiles/filedetails/?id=2527824716)
+
 This is a base expansion to the Customizable Weaponry 2 (CW2) SWEP base. It aims to exist alongside the original SWEPs without being a base overhaul or rewrite.
 
 I wrote this to add a bunch of functionality for the FA:S 2 SWEPs and to give other developers who are still using CW2 some new capabilities. Where possible, I used the hooks instead of copying over and reimplementing functions. I chose to do this in order to:
