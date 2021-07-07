@@ -1,4 +1,4 @@
--- Special functions for FAS2 behavior and to expand functionality
+-- Functions that handle shooting/shooting-related stuff
 local SP = game.SinglePlayer()
 
 --[[
@@ -71,7 +71,7 @@ function SWEP:fireAnimFunc()
     self:sendWeaponAnim(animString, self.FireAnimSpeed)
 end
 
--- Override to play the bipod animation, hope this shit works
+-- Override to play the bipod animation
 function SWEP:performBipodDelay(time)
     time = time or self.BipodDeployTime
     local CT = CurTime()

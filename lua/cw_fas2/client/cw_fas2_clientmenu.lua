@@ -1,4 +1,4 @@
-
+-- Setup stuff for the config menu
 local function CW2_FAS2_ClientsidePanel(panel)
     panel:ClearControls()
 

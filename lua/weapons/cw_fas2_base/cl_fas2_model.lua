@@ -1,6 +1,9 @@
+-- Functions that handle viewmodel related stuff
+
 local reg = debug.getregistry()
 -- since these are often-called functions (and somewhat expensive), we make local references to them to reduce the overhead as much as possible
 local ManipulateBonePosition, ManipulateBoneAngles = reg.Entity.ManipulateBonePosition, reg.Entity.ManipulateBoneAngles
+local Vec0, Ang0 = Vector(), Angle()
 
 function SWEP:getBaseViewModelPos()
     if GetConVar("cw_alternative_vm_pos"):GetBool() and !self:GetOwner():IsSprinting() and self.AlternativePos then
@@ -141,7 +144,7 @@ function SWEP:canOffsetM203()
 
     return self.Cycle >= self[offsetName]
 end
-local Vec0, Ang0 = Vector(), Angle()
+
 -- Overriden to allow fast reload bone offsetting
 function SWEP:offsetBones()
     local vm = self.CW_VM
@@ -393,9 +396,8 @@ function SWEP:createCustomVM(mdl)
     end
 end
 
+-- Overriden to draw c-hands
 function SWEP:_drawViewModel()
-    -- draw the viewmodel
-
     if self.ViewModelFlip then
         render.CullMode(MATERIAL_CULLMODE_CW)
     end

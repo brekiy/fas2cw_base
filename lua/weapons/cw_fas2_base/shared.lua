@@ -54,12 +54,13 @@ if CLIENT then
 
     SWEP.ViewModelFlip	= false
     SWEP.HUD_3D2DScale = 0.0105
+    -- I hate the vanilla one, maybe I'll work on something to fix the behavior
     SWEP.ReloadViewBobEnabled = false
     SWEP.RVBPitchMod = 0.4
     SWEP.RVBYawMod = 0.4
     SWEP.RVBRollMod = 0.4
     SWEP.PosBasedMuz = false
-    -- Recoil shake factor
+    -- Recoil shake factor, do not change
     SWEP.CameraShakeFactor = 0
 
     -- This offset is added to all aimpositions
@@ -84,41 +85,52 @@ if CLIENT then
     -- Otherwise the code will just skip over setting aim positions for bodygroup optics. :)
     -- What a nice gap in logic that i cant be assed to override right now
     -- SWEP.AttachmentModelsVM = {}
+
+    -- Denotes the weapon as actually being set up for c-hands
     SWEP.CArmsVM = true
+    -- Handled in the init() hook, will grab the correct arms for you
     SWEP.CArmsModel = "models/weapons/c_arms.mdl"
 end
 
 SWEP.UseHands = true
 
--- render target shit on the base FAS2 weapons
+-- render target material on the base FAS2 weapons
 SWEP.PSO1Glass = Material("models/weapons/view/accessories/Lens_EnvSolid")
 
 -- these suck
 SWEP.BounceWeaponIcon = false
 SWEP.DrawWeaponInfoBox = false
 
-SWEP.MuzzleVelocity = 300 -- m/s, required value
-SWEP.ManualCycling = false -- bolt/pump, if true then uncocks the gun every shot
-SWEP.CycleDelay = 0.8 -- standard cycle
-SWEP.CycleDelayAim = 0.83 -- ditto ads
-SWEP.CycleDelayFast = 0.67 -- fast cycling with SWEP.FastReload, if you have an animation for it
-SWEP.CycleDelayFastAim = 0.62 -- ditto ads
-SWEP.Cocked = true -- needs to be cocked to fire
-SWEP.ShotgunReloadEmptyInsert = false -- whether the empty reload start animation inserts a shell or not
+-- m/s, required value
+SWEP.MuzzleVelocity = 300
+-- bolt/pump, if true then uncocks the gun every shot
+SWEP.ManualCycling = false
+-- standard cycle, used if above true
+SWEP.CycleDelay = 0.8
+-- ditto when ADS
+SWEP.CycleDelayAim = 0.83
+-- fast cycling with SWEP.FastReload, if you have an animation for it
+SWEP.CycleDelayFast = 0.67
+SWEP.CycleDelayFastAim = 0.62
+-- needs to be cocked to fire
+SWEP.Cocked = true
+-- whether the empty reload start animation inserts a shell or not
+SWEP.ShotgunReloadEmptyInsert = false
 SWEP.ShotgunReloadEmptyInsertCount = 1
 
 SWEP.MuzzleAttachment = 1
 SWEP.MuzzleAttachmentName = "muzzle"
 SWEP.EjectorAttachmentName = "ejector"
 
-SWEP.SpeedDec = 20 -- source units
+-- source units
+SWEP.SpeedDec = 20
 
-SWEP.Recoil = 1.1 -- vertical
-SWEP.RecoilSide = 0.55 -- horizontal
+-- vertical
+SWEP.Recoil = 1.1
+-- horizontal
+SWEP.RecoilSide = 0.55
 
--- Explanations of various tabular props
 --[[
-
 -- Example attachments
 -- This MUST have a key of 1, otherwise some shit breaks regarding selecting custom laser colors etc.
 SWEP.Attachments = {
@@ -128,7 +140,9 @@ SWEP.Attachments = {
     ["+use"] = {header = "Perk", offset = {1200, 50}, atts = {"pk_fas2_fast_reload"}},
     ["+reload"] = {header = "Ammo", offset = {600, 250}, atts = {"am_magnum", "am_matchgrade"}}
 }
+]]--
 
+--[[
 -- Example animations
 SWEP.Animations = {
     fire = {"fire1", "fire2", "fire3"}, --shooting
@@ -152,7 +166,9 @@ SWEP.Animations = {
     bipod_down = "bipod_down",
     bipod_up = "bipod_up",
 }
+]]--
 
+--[[
 -- Sounds table, recommended to define this in a separate file and get it included to improve readability
 -- <animation> = <table array of sounds and times>
 SWEP.Sounds = {
@@ -160,8 +176,8 @@ SWEP.Sounds = {
 }
 ]]--
 
-SWEP.ADSSpeed = 1 -- multiplier for how quickly this weapon goes into irons
-
+-- multiplier for how quickly this weapon goes into irons, unimplemented atm
+SWEP.ADSSpeed = 1
 
 -- Time of wet reload sequence
 SWEP.ReloadTime = 2
@@ -203,3 +219,34 @@ SWEP.PumpMidReloadWait = 0.7
 ]]--
 
 SWEP.Chamberable = true
+
+--[[
+-- Hyperburst table
+-- The numeric key sets up the characteristics for the shot AFTER this one.
+-- So here we fire a single shot, keyed as 0, and set the stats for the next shot (1) based on the subtable
+-- Then we fire the next shot, keyed as 1, and set the stats for the next shot (2) based on the subtable
+-- All shots after don't have an entry, so we revert to the default values (whatever those are)
+SWEP.SpecialBurstTable = {
+    [0] = {
+        fireDelayMult = 0.03333,
+        recoilMult = 0.1,
+        spreadPerShotMult = 0.1
+    },
+    [1] = {
+        fireDelayMult = 0.06,
+        recoilMult = 0.6,
+        spreadPerShotMult = 0.6
+    }
+}
+]]--
+
+SWEP.HipSpread = 0.047
+SWEP.AimSpread = 0.0037
+-- The higher, the more moving will affect your accuracy spread
+SWEP.VelocitySensitivity = 1.8
+SWEP.MaxSpreadInc = 0.03
+SWEP.SpreadPerShot = 0.0068
+SWEP.SpreadCooldown = 0.153
+SWEP.Shots = 1
+SWEP.Damage = 24
+SWEP.DeployTime = 0.8

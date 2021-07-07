@@ -1,4 +1,7 @@
 AddCSLuaFile()
+
+-- Just a utility loader file. This way these attachments get loaded in after the base CW2 stuff
+
 local path = "cw_fas2/shared/attachments/"
 
 -- load attachment files

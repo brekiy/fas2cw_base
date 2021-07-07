@@ -1,3 +1,4 @@
+-- Functions to handle stat calcs
 
 function SWEP:recalculateMuzzleVelocity()
     self.MuzzleVelocity = self.MuzzleVelocity_Orig * self.MuzzleVelocityMult

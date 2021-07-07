@@ -1,5 +1,5 @@
 AddCSLuaFile()
---stuff it in here to load stat updates before the attachments
+-- Load new stats
 CustomizableWeaponry.originalValue:add("NearWallDistance", false)
 CustomizableWeaponry.originalValue:add("MuzzleVelocity", true)
 CustomizableWeaponry.originalValue:add("RecoilSide", true)
@@ -54,4 +54,4 @@ CustomizableWeaponry:registerRecognizedStat(
     CustomizableWeaponry.textColors.NEGATIVE
 )
 
-print("registering fas2 cw stats")
+print("[CW2 FAS2] registering new stats")
