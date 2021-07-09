@@ -367,7 +367,7 @@ end
 -- Adds an offset to bipod ADS position for weapons that need it
 CustomizableWeaponry.callbacks:addNew("adjustViewmodelPosition", "FAS2_BIPOD_AIM_OFFSET", function(self, targetPos, targetAng)
     local newTargetPos, newTargetAng = targetPos, targetAng
-    if self.dt.State == CW_AIMING and self.dt.BipodDeployed then
+    if self.dt.State == CW_AIMING and self.dt.BipodDeployed and self._CalcBipodAimOffsets then
         newTargetPos, newTargetAng = self:_CalcBipodAimOffsets(newTargetPos, newTargetAng)
     end
     return newTargetPos, newTargetAng
