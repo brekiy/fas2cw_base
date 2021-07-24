@@ -31,6 +31,7 @@ function SWEP:DrawWeaponSelection(x, y, wide, tall, alpha)
 end
 
 CustomizableWeaponry.callbacks:addNew("initialize", "FAS2_autoIcon", function(self)
+    if killicon.Exists(self:GetClass()) and self.SelectIcon then return end
     -- will look for a select icon texture under /materials/vgui/inventory/<weapon classname>
     local weaponClass = self:GetClass()
     local defaultPath = "vgui/inventory/" .. weaponClass

@@ -114,6 +114,7 @@ SWEP.CycleDelayFast = 0.67
 SWEP.CycleDelayFastAim = 0.62
 -- needs to be cocked to fire
 SWEP.Cocked = true
+SWEP.Cycling = false
 -- whether the empty reload start animation inserts a shell or not
 SWEP.ShotgunReloadEmptyInsert = false
 SWEP.ShotgunReloadEmptyInsertCount = 1

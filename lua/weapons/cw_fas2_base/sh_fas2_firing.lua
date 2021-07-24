@@ -5,7 +5,7 @@ local SP = game.SinglePlayer()
     Override to:
     1. Adjust viewpunch
     2. Add camera shake factor tracking
-]]-- 
+]]--
 function SWEP:MakeRecoil(mod)
     local finalMod = self:GetRecoilModifier(mod)
     local IFTP = IsFirstTimePredicted()
@@ -109,16 +109,15 @@ function SWEP:_manualActionHelp()
     cycleDelay = self[cycleDelayStr]
     shellDelay = self[shellDelayStr]
     self:sendWeaponAnim(animString)
-    -- print(animString)
+    self:setGlobalDelay(cycleDelay)
     timer.Simple(cycleDelay, function()
         self.Cocked = true
         self.Cycling = false
     end)
     if CLIENT then
-        self.NoShells = false
         timer.Simple(shellDelay, function()
-            self:CreateShell()
-            self.NoShells = true
+            self:FAS2_MakeFakeShell(self.Shell, 1, self.EjectorAttachmentName)
+            -- self.NoShells = true
         end)
     end
 
@@ -128,25 +127,32 @@ function SWEP:ManualAction()
     if !self.ManualCycling or self.Cocked or self.WasEmpty then
         return false
     end
-
     if self.Cycling then
         -- exit early if we're already trying to do this
         return true
     end
-
-    if self:Clip1() > 0 and !self:GetOwner():KeyDown(IN_ATTACK) and self:GetNextPrimaryFire() < CurTime() and !self.Cycling then
+    if self:Clip1() > 0 and !self:GetOwner():KeyDown(IN_ATTACK) and math.max(self.GlobalDelay, self:GetNextPrimaryFire()) < CurTime() then
         self:_manualActionHelp()
     end
     return true
 end
 
 function SWEP:uncycle()
-    if self.ManualCycling then self.Cocked = false end
+    if self.ManualCycling then
+        self.Cocked = false
+    end
 end
 
 function SWEP:checkManualCycling()
     -- callback condition checks that the callback returns FALSE before it lets you shoot
-    if self.ManualCycling then return !self.Cocked end
+    if self.ManualCycling then
+        if self.Cocked and !self.Cycling then
+            return false
+        else
+            return true
+        end
+    end
+    return false
 end
 
 function SWEP:deployBipodAnim()
@@ -168,7 +174,7 @@ end
     2. Recoil => Set the next shot to occur with this recoil.
     3. SpreadPerShot => Set the next shot to occur with this spread increase.
 ]]--
-function SWEP:specialBurst()
+function SWEP:SpecialBurst()
     if self.SpecialBurstTable and self.BurstAmount > 0 then
         local shots = self.dt.Shots
         local mods = self.SpecialBurstTable[shots]
@@ -186,31 +192,70 @@ function SWEP:specialBurst()
     end
 end
 
-function SWEP:saveNonBurstValues()
+function SWEP:SaveNonBurstValues()
     self.NonBurstFireDelay = self.FireDelay
     self.NonBurstRecoil = self.Recoil
     self.NonBurstRecoilSide = self.RecoilSide
     self.NonBurstSpreadPerShot = self.SpreadPerShot
 end
 
-if SERVER then
-    CustomizableWeaponry.callbacks:addNew("postFire", "FAS2_uncycle", function(self)
-        if self.uncycle then self:uncycle() end
-    end)
-    CustomizableWeaponry.callbacks:addNew("preFire", "FAS2_checkManualCycling", function(self)
-        if self.checkManualCycling then return self:checkManualCycling() else return false end
-    end)
-    CustomizableWeaponry.callbacks:addNew("preFire", "FAS2_specialBurst", function(self)
-        if self.specialBurst and self.BurstAmount and self.BurstAmount > 0 then self:specialBurst() end
-        return false
-    end)
-    CustomizableWeaponry.callbacks:addNew("initialize", "FAS2_specialBurstInit", function(self)
-        if self.SpecialBurstTable then self:saveNonBurstValues() end
-    end)
-    CustomizableWeaponry.callbacks:addNew("postAttachAttachment", "FAS2_resetNonBurstValues", function(self)
-        if self.SpecialBurstTable then self:saveNonBurstValues() end
-    end)
-    CustomizableWeaponry.callbacks:addNew("postDetachAttachment", "FAS2_resetNonBurstValues", function(self)
-        if self.SpecialBurstTable then self:saveNonBurstValues() end
-    end)
+-- Override to reset all hyperburst stuff
+function SWEP:CycleFiremodes()
+    t = self.FireModes
+
+    if !t.last then
+        t.last = 2
+    else
+        if !t[t.last + 1] then
+            t.last = 1
+        else
+            t.last = t.last + 1
+        end
+    end
+
+    if self.dt.State == CW_AIMING or self:isBipodDeployed() then
+        if self.FireModes[t.last] == "safe" then
+            t.last = 1
+        end
+    end
+
+    if self.FireMode != self.FireModes[t.last] and self.FireModes[t.last] then
+        CT = CurTime()
+
+        if IsFirstTimePredicted() then
+            self:SelectFiremode(self.FireModes[t.last])
+            if self.SpecialBurstTable then
+                self.FireDelay = self.NonBurstFireDelay
+                self.Recoil = self.NonBurstRecoil
+                self.RecoilSide = self.NonBurstRecoilSide
+                self.SpreadPerShot = self.NonBurstSpreadPerShot
+            end
+        end
+
+        self:SetNextPrimaryFire(CT + 0.25)
+        self:SetNextSecondaryFire(CT + 0.25)
+        self.ReloadWait = CT + 0.25
+    end
 end
+
+CustomizableWeaponry.callbacks:addNew("preFire", "FAS2_specialBurst", function(self)
+    if self.SpecialBurst and self.BurstAmount and self.BurstAmount > 0 then self:SpecialBurst() end
+    return false
+end)
+CustomizableWeaponry.callbacks:addNew("postAttachAttachment", "FAS2_resetNonBurstValues", function(self)
+    if self.SpecialBurstTable then self:SaveNonBurstValues() end
+end)
+CustomizableWeaponry.callbacks:addNew("postDetachAttachment", "FAS2_resetNonBurstValues", function(self)
+    if self.SpecialBurstTable then self:SaveNonBurstValues() end
+end)
+CustomizableWeaponry.callbacks:addNew("initialize", "FAS2_specialBurstInit", function(self)
+    if self.SpecialBurstTable then self:SaveNonBurstValues() end
+end)
+CustomizableWeaponry.callbacks:addNew("postFire", "FAS2_uncycle", function(self)
+    if self.uncycle then self:uncycle() end
+end)
+CustomizableWeaponry.callbacks:addNew("preFire", "FAS2_checkManualCycling", function(self)
+    if self.checkManualCycling then
+        return self:checkManualCycling()
+    else return false end
+end)
