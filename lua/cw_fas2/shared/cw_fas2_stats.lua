@@ -54,4 +54,4 @@ CustomizableWeaponry:registerRecognizedStat(
     CustomizableWeaponry.textColors.NEGATIVE
 )
 
-print("[CW2 FAS2] registering new stats")
+print("[CW2 FAS2] registered new stats")
