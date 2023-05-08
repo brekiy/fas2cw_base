@@ -1,9 +1,7 @@
 -- Setup stuff for the config menu
 local function CW2_FAS2_ClientsidePanel(panel)
     panel:ClearControls()
-
     panel:AddControl("Label", {Text = "Visual effects control"})
-
     panel:AddControl("CheckBox", {Label = "Camera shake on recoil?", Command = "cw_fas2_recoil_shake"})
 
 end
@@ -21,7 +19,7 @@ local function CW2_FAS2_AdminPanel(panel)
     panel:AddControl("CheckBox", {Label = "Draw non-tracers?", Command = "cw_fas2_physical_bullet_nontracer_trails"})
 
     panel:AddControl("Label", {Text = "Multipliers"})
-    -- autocenter time slider
+
     local slider = vgui.Create("DNumSlider", panel)
     slider:SetDecimals(2)
     slider:SetMin(0.1)
@@ -32,8 +30,7 @@ local function CW2_FAS2_AdminPanel(panel)
     slider:SetDark(true)
     panel:AddItem(slider)
 
-    -- autocenter time slider
-    local slider = vgui.Create("DNumSlider", panel)
+    local slider2 = vgui.Create("DNumSlider", panel)
     slider:SetDecimals(2)
     slider:SetMin(0.1)
     slider:SetMax(2)
@@ -46,7 +43,7 @@ local function CW2_FAS2_AdminPanel(panel)
 end
 
 local function CW2_FAS2_PopulateToolMenu()
-    spawnmenu.AddToolMenuOption("Utilities", "CW 2.0 SWEPs", "CW 2.0 FAS2 Client", "FAS2 Exp. Client", "", "", CW2_FAS2_ClientsidePanel)
+    -- spawnmenu.AddToolMenuOption("Utilities", "CW 2.0 SWEPs", "CW 2.0 FAS2 Client", "FAS2 Exp. Client", "", "", CW2_FAS2_ClientsidePanel)
     spawnmenu.AddToolMenuOption("Utilities", "CW 2.0 SWEPs", "CW 2.0 FAS2 Admin", "FAS2 Exp. Admin", "", "", CW2_FAS2_AdminPanel)
 end
 
